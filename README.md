@@ -40,6 +40,14 @@ graph TD
     SE --> FR
 ```
 
+## Assets
+
+### Cover Page Banner
+![Cover Page Banner](assets/cover_page_banner.png)
+
+### Workflow Architecture Diagram
+![Workflow Architecture Diagram](assets/architecture_diagram.png)
+
 ## How to Run
 
 *   **Playground Mode:** Run interactive testing UI:
@@ -112,3 +120,7 @@ graph TD
    ```
 
 ⚠ NEVER push .env to GitHub. Your API key will be exposed publicly.
+
+## Demo Script
+
+The spoken presentation script is available in [DEMO_SCRIPT.txt](file:///c:/Users/nhien/Desktop/ADK-workspace/audit-compliance-copilot/DEMO_SCRIPT.txt). It guides you through presenting the project cover banner, architecture diagram, and running live test cases.
