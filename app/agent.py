@@ -228,35 +228,55 @@ def security_event_handler(ctx: Context, node_input: str) -> Event:
     yield Event(content=types.Content(role='model', parts=[types.Part.from_text(text=msg)]))
     yield Event(output={"status": "security_block", "message": msg})
 
-def route_decision(ctx: Context, node_input: dict) -> Event:
-    requires_review = node_input.get("requires_human_review", False)
-    if requires_review:
-        return Event(output=node_input, route="human_review")
-    return Event(output=node_input, route="auto_approve")
+def _ensure_dict(value) -> dict:
+    """Safely convert value to dict, handling JSON strings and other types."""
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+            if isinstance(parsed, dict):
+                return parsed
+        except (json.JSONDecodeError, TypeError):
+            pass
+    if hasattr(value, "model_dump"):
+        return value.model_dump()
+    return {}
 
-async def human_approval(ctx: Context, node_input: dict):
+def route_decision(ctx: Context, node_input) -> Event:
+    data = _ensure_dict(node_input)
+    requires_review = data.get("requires_human_review", False)
+    if requires_review:
+        return Event(output=data, route="human_review")
+    return Event(output=data, route="auto_approve")
+
+async def human_approval(ctx: Context, node_input):
+    data = _ensure_dict(node_input)
     if not ctx.resume_inputs or "approval" not in ctx.resume_inputs:
         yield RequestInput(
             interrupt_id="approval",
-            message=f"Human Review Required! Risk Score: {node_input.get('risk_score')}/100. Violations: {node_input.get('violations_found')}. Approve the transactions? (yes/no):"
+            message=f"Human Review Required! Risk Score: {data.get('risk_score')}/100. Violations: {data.get('violations_found')}. Approve the transactions? (yes/no):"
         )
         return
     
     decision = ctx.resume_inputs["approval"]
+    if isinstance(decision, dict):
+        decision = decision.get("response", decision.get("text", str(decision)))
     ctx.state["human_decision"] = decision
     yield Event(output={
         "status": "reviewed",
         "decision": decision,
-        "report": node_input
+        "report": data
     })
 
-def final_report(ctx: Context, node_input: dict) -> Event:
-    if "decision" in node_input:
-        status_text = f"Audit reviewed by human. Decision: {node_input['decision']}."
-        report_data = node_input["report"]
+def final_report(ctx: Context, node_input) -> Event:
+    data = _ensure_dict(node_input)
+    if "decision" in data:
+        status_text = f"Audit reviewed by human. Decision: {data['decision']}."
+        report_data = _ensure_dict(data.get("report", {}))
     else:
         status_text = "Audit auto-approved (no human review needed)."
-        report_data = node_input
+        report_data = data
 
     summary = (
         f"### Audit Compliance Report\n"
