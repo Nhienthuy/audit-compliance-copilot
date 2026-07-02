@@ -29,11 +29,11 @@ graph TD
 
 This project leverages key concepts from the **Agent Development Kit (ADK)**:
 
-1.  **ADK Workflow Graph API:** Graph routing is implemented in [app/agent.py](file:///c:/Users/nhien/Desktop/ADK-workspace/audit-compliance-copilot/app/agent.py#L191) using nodes (`FunctionNode`, `LlmAgent`) and structured edges.
-2.  **LlmAgent Sub-Agents:** Specialized sub-agents like `transaction_analyzer` and `compliance_auditor` are declared in [app/agent.py](file:///c:/Users/nhien/Desktop/ADK-workspace/audit-compliance-copilot/app/agent.py#L42) to isolate responsibilities.
-3.  **AgentTool Delegation:** The lead `orchestrator_agent` uses `AgentTool` in [app/agent.py](file:///c:/Users/nhien/Desktop/ADK-workspace/audit-compliance-copilot/app/agent.py#L90) to delegate sub-tasks to specialized sub-agents.
-4.  **MCP Server Integration:** Local tool integration is built in [app/mcp_server.py](file:///c:/Users/nhien/Desktop/ADK-workspace/audit-compliance-copilot/app/mcp_server.py) and registered as an `McpToolset` in [app/agent.py](file:///c:/Users/nhien/Desktop/ADK-workspace/audit-compliance-copilot/app/agent.py#L59) for employees, policies, and logging.
-5.  **Security Checkpoint Node:** Input validation, PII scrubbing, injection detection, and audit logging are implemented in the `security_checkpoint` FunctionNode in [app/agent.py](file:///c:/Users/nhien/Desktop/ADK-workspace/audit-compliance-copilot/app/agent.py#L101).
+1.  **ADK Workflow Graph API:** Graph routing is implemented in [app/agent.py](app/agent.py) using nodes (`FunctionNode`, `LlmAgent`) and structured edges.
+2.  **LlmAgent Sub-Agents:** Specialized sub-agents like `transaction_analyzer` and `compliance_auditor` are declared in [app/agent.py](app/agent.py) to isolate responsibilities.
+3.  **AgentTool Delegation:** The lead `orchestrator_agent` uses `AgentTool` in [app/agent.py](app/agent.py) to delegate sub-tasks to specialized sub-agents.
+4.  **MCP Server Integration:** Local tool integration is built in [app/mcp_server.py](app/mcp_server.py) and registered as an `McpToolset` in [app/agent.py](app/agent.py) for employees, policies, and logging.
+5.  **Security Checkpoint Node:** Input validation, PII scrubbing, injection detection, and audit logging are implemented in the `security_checkpoint` FunctionNode in [app/agent.py](app/agent.py).
 6.  **Agents CLI Scaffolding:** Scaffolded using `agents-cli scaffold create` and configured via `pyproject.toml` and `Makefile`.
 
 ## Security Design
@@ -46,14 +46,14 @@ The `security_checkpoint` node sits at the front of the graph and handles:
 
 ## MCP Server Design
 
-The Python MCP Server ([app/mcp_server.py](file:///c:/Users/nhien/Desktop/ADK-workspace/audit-compliance-copilot/app/mcp_server.py)) runs as a local stdio process exposing:
+The Python MCP Server ([app/mcp_server.py](app/mcp_server.py)) runs as a local stdio process exposing:
 *   `get_corporate_policies`: Returns the active company expense guidelines.
 *   `lookup_employee_allowance`: Resolves custom allowances based on employee work emails.
 *   `log_audit_action`: Logs a persistent audit log entry of violations and overrides.
 
 ## Human-in-the-Loop (HITL) Flow
 
-A `RequestInput` interrupt is created at `human_approval` in [app/agent.py](file:///c:/Users/nhien/Desktop/ADK-workspace/audit-compliance-copilot/app/agent.py#L162) if the risk assessment recommends human compliance review. This pauses execution and prompts the user in the playground UI for a yes/no confirmation, resuming only after receiving input.
+A `RequestInput` interrupt is created at `human_approval` in [app/agent.py](app/agent.py) if the risk assessment recommends human compliance review. This pauses execution and prompts the user in the playground UI for a yes/no confirmation, resuming only after receiving input.
 
 ## Demo Walkthrough
 
